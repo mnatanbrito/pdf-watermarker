@@ -16,6 +16,7 @@ const PagePreview: React.FC<Props> = ({children}: Props) => {
       width="240px"
       justifyContent="center"
       alignItems="center"
+      padding={0}
     >
       {children}
     </Box>

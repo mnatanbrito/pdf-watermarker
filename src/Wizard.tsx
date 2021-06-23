@@ -18,6 +18,7 @@ import {
   AlertDescription,
   AlertIcon,
   CircularProgress,
+  Checkbox,
 } from '@chakra-ui/react'
 import {motion, PanInfo} from 'framer-motion'
 
@@ -42,6 +43,8 @@ const Wizard: React.FC<Props> = (props: Props) => {
     useState<boolean>(false)
   const [zeroFilesSelected, setZeroFilesSelected] = useState<boolean>(false)
   const [finished, setFinished] = useState<boolean>(false)
+  const [shouldRepeat, setShouldRepeat] = useState<boolean>(false)
+  const numberOfRepeats: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
   const noFile = file === null || file === undefined
 
@@ -130,18 +133,26 @@ const Wizard: React.FC<Props> = (props: Props) => {
   }
 
   const onFinish = async () => {
-    setStep('download-file')
+    try {
+      setStep('download-file')
 
-    await sendWatermarkRequest({
-      message,
-      fontSize,
-      position,
-      rotation,
-      containerWidth,
-      files: [file as File],
-    })
+      await sendWatermarkRequest({
+        message,
+        fontSize,
+        position,
+        rotation,
+        containerWidth,
+        files: [file as File],
+      })
 
-    setFinished(true)
+      setFinished(true)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onChangeShouldRepeat = () => {
+    setShouldRepeat((should) => !should)
   }
 
   const onResetState = () => {
@@ -152,6 +163,8 @@ const Wizard: React.FC<Props> = (props: Props) => {
     setInitialPosition(null)
     setPosition(null)
     setContainerWidth(15)
+    setShouldRepeat(false)
+    setFinished(false)
     // @ts-ignore
     setFile()
     setInvalidFileExtension(false)
@@ -233,8 +246,8 @@ const Wizard: React.FC<Props> = (props: Props) => {
                     <Slider
                       aria-label="slider-ex-1"
                       defaultValue={14}
-                      min={12}
-                      max={48}
+                      min={shouldRepeat ? 8 : 12}
+                      max={!shouldRepeat ? 48 : 18}
                       onChange={onChangeSize}
                       value={fontSize}
                     >
@@ -271,24 +284,40 @@ const Wizard: React.FC<Props> = (props: Props) => {
                     </Center>
                   </VStack>
 
+                  <VStack flex="1" align="stretch" minH="45px">
+                      {!shouldRepeat && (
+                        <>
+                          <Slider
+                            aria-label="slider-ex-1"
+                            defaultValue={15}
+                            min={15}
+                            max={100}
+                            value={containerWidth}
+                            onChange={onChangeContainerWidth}
+                          >
+                            <SliderTrack bg="purple.50">
+                              <SliderFilledTrack bg="purple.100" />
+                            </SliderTrack>
+                            <SliderThumb bg="purple.400" />
+                          </Slider>
+                          <Center>
+                            <Text color="purple.400">
+                              Largura do container: {containerWidth}%
+                            </Text>
+                          </Center>
+                        </>
+                      )}                      
+                  </VStack>
+
                   <VStack flex="1" align="stretch">
-                    <Slider
-                      aria-label="slider-ex-1"
-                      defaultValue={15}
-                      min={15}
-                      max={100}
-                      value={containerWidth}
-                      onChange={onChangeContainerWidth}
-                    >
-                      <SliderTrack bg="purple.50">
-                        <SliderFilledTrack bg="purple.100" />
-                      </SliderTrack>
-                      <SliderThumb bg="purple.400" />
-                    </Slider>
-                    <Center>
-                      <Text color="purple.400">
-                        Largura do container: {containerWidth}%
-                      </Text>
+                    <Center marginTop="60px">
+                      <Checkbox
+                        defaultIsChecked={false}
+                        onChange={onChangeShouldRepeat}
+                        checked={shouldRepeat}
+                      >
+                        Repetir estampa por todo o documento
+                      </Checkbox>
                     </Center>
                   </VStack>
                 </VStack>
@@ -296,22 +325,51 @@ const Wizard: React.FC<Props> = (props: Props) => {
               <Box flex="1">
                 <Center>
                   <PagePreview>
-                    <motion.div
-                      drag
-                      dragElastic={false}
-                      dragMomentum={false}
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
-                    >
-                      <Text
-                        fontSize={`${fontSize * downsizeFactor}pt`}
-                        color="gray.500"
-                        transform={`rotate(${rotation}deg)`}
-                        width={`${containerWidth}%`}
+                    {!shouldRepeat && (
+                      <motion.div
+                        drag
+                        dragElastic={false}
+                        dragMomentum={false}
+                        onDragStart={onDragStart}
+                        onDragEnd={onDragEnd}
                       >
-                        {message}
-                      </Text>
-                    </motion.div>
+                        <Text
+                          fontSize={`${fontSize * downsizeFactor}pt`}
+                          color="gray.500"
+                          transform={`rotate(${rotation}deg)`}
+                          width={`${containerWidth}%`}
+                        >
+                          {message}
+                        </Text>
+                      </motion.div>
+                    )}
+                    {shouldRepeat && (
+                      <div style={{
+                        paddingTop: '20px',
+                        paddingBottom: '20px',
+                        display: 'block',
+                        width: '100%',
+                        height: '100%'
+                      }}>
+                        {numberOfRepeats.map((current) => (
+                          <div key={`item-${current}`} style={{
+                            width: '79px',
+                            height: `${320 / 4}px`,
+                            display: 'inline-block',
+                          }}>
+                            <Text
+                              flex="1"
+                              fontSize={`${fontSize * downsizeFactor}pt`}
+                              color="gray.500"
+                              transform={`rotate(${rotation}deg)`}
+                              textAlign="center"
+                            >
+                              {message}
+                            </Text>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </PagePreview>
                 </Center>
               </Box>

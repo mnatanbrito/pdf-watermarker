@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import {HexColorPicker} from 'react-colorful'
 import {
   Flex,
   VStack,
@@ -35,6 +36,8 @@ const Wizard: React.FC<Props> = (props: Props) => {
   const [message, setMessage] = useState<string>('')
   const [fontSize, setFontSize] = useState<number>(12)
   const [rotation, setRotation] = useState<number>(0)
+  const [opacity, setOpacity] = useState<number>(1)
+  const [color, setColor] = useState<string>('#000000')
   const [initialPosition, setInitialPosition] = useState<any>()
   const [position, setPosition] = useState<any>()
   const [containerWidth, setContainerWidth] = useState<number>(15)
@@ -90,6 +93,10 @@ const Wizard: React.FC<Props> = (props: Props) => {
 
   const onChangeRotation = (newRotation: number) => {
     setRotation(newRotation)
+  }
+
+  const onChangeOpacity = (newOpacity: number) => {
+    setOpacity(newOpacity)
   }
 
   const onChangeContainerWidth = (newWidth: number) => {
@@ -195,7 +202,7 @@ const Wizard: React.FC<Props> = (props: Props) => {
           '35%', // base
           '45%', // 480px upwards
           '55%', // 768px upwards
-          '65%', // 992px upwards
+          step === 'define-ratio' ? '80%' : '65%', // 992px upwards
         ]}
         display="flex"
         borderWidth="1px"
@@ -284,33 +291,62 @@ const Wizard: React.FC<Props> = (props: Props) => {
                     </Center>
                   </VStack>
 
-                  <VStack flex="1" align="stretch" minH="45px">
-                      {!shouldRepeat && (
-                        <>
-                          <Slider
-                            aria-label="slider-ex-1"
-                            defaultValue={15}
-                            min={15}
-                            max={100}
-                            value={containerWidth}
-                            onChange={onChangeContainerWidth}
-                          >
-                            <SliderTrack bg="purple.50">
-                              <SliderFilledTrack bg="purple.100" />
-                            </SliderTrack>
-                            <SliderThumb bg="purple.400" />
-                          </Slider>
-                          <Center>
-                            <Text color="purple.400">
-                              Largura do container: {containerWidth}%
-                            </Text>
-                          </Center>
-                        </>
-                      )}                      
+                  <VStack flex="1" align="stretch">
+                    <Slider
+                      aria-label="slider-ex-1"
+                      defaultValue={1}
+                      min={0}
+                      step={0.1}
+                      max={1}
+                      value={opacity}
+                      onChange={onChangeOpacity}
+                    >
+                      <SliderTrack bg="purple.50">
+                        <SliderFilledTrack bg="purple.100" />
+                      </SliderTrack>
+                      <SliderThumb bg="purple.400" />
+                    </Slider>
+                    <Center>
+                      <Text color="purple.400">Opacidade: {opacity}</Text>
+                    </Center>
                   </VStack>
 
                   <VStack flex="1" align="stretch">
-                    <Center marginTop="60px">
+                    <Center>
+                      <HexColorPicker color={color} onChange={setColor} />
+                    </Center>
+                    <Center>
+                      <Text color="purple.400">Cor: {color}</Text>
+                    </Center>
+                  </VStack>
+
+                  <VStack flex="1" align="stretch" minH="45px">
+                    {!shouldRepeat && (
+                      <>
+                        <Slider
+                          aria-label="slider-ex-1"
+                          defaultValue={15}
+                          min={15}
+                          max={100}
+                          value={containerWidth}
+                          onChange={onChangeContainerWidth}
+                        >
+                          <SliderTrack bg="purple.50">
+                            <SliderFilledTrack bg="purple.100" />
+                          </SliderTrack>
+                          <SliderThumb bg="purple.400" />
+                        </Slider>
+                        <Center>
+                          <Text color="purple.400">
+                            Largura do container: {containerWidth}%
+                          </Text>
+                        </Center>
+                      </>
+                    )}
+                  </VStack>
+
+                  <VStack flex="1" align="stretch">
+                    <Center marginTop="30px">
                       <Checkbox
                         defaultIsChecked={false}
                         onChange={onChangeShouldRepeat}
@@ -335,34 +371,41 @@ const Wizard: React.FC<Props> = (props: Props) => {
                       >
                         <Text
                           fontSize={`${fontSize * downsizeFactor}pt`}
-                          color="gray.500"
+                          color={color}
                           transform={`rotate(${rotation}deg)`}
                           width={`${containerWidth}%`}
+                          opacity={opacity}
                         >
                           {message}
                         </Text>
                       </motion.div>
                     )}
                     {shouldRepeat && (
-                      <div style={{
-                        paddingTop: '20px',
-                        paddingBottom: '20px',
-                        display: 'block',
-                        width: '100%',
-                        height: '100%'
-                      }}>
+                      <div
+                        style={{
+                          paddingTop: '20px',
+                          paddingBottom: '20px',
+                          display: 'block',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                      >
                         {numberOfRepeats.map((current) => (
-                          <div key={`item-${current}`} style={{
-                            width: '79px',
-                            height: `${320 / 4}px`,
-                            display: 'inline-block',
-                          }}>
+                          <div
+                            key={`item-${current}`}
+                            style={{
+                              width: '79px',
+                              height: `${320 / 4}px`,
+                              display: 'inline-block',
+                            }}
+                          >
                             <Text
                               flex="1"
                               fontSize={`${fontSize * downsizeFactor}pt`}
-                              color="gray.500"
+                              color={color}
                               transform={`rotate(${rotation}deg)`}
                               textAlign="center"
+                              opacity={opacity}
                             >
                               {message}
                             </Text>

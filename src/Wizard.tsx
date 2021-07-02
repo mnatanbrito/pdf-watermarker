@@ -167,6 +167,8 @@ const Wizard: React.FC<Props> = (props: Props) => {
     setMessage('')
     setFontSize(12)
     setRotation(0)
+    setOpacity(1)
+    setColor('#000000')
     setInitialPosition(null)
     setPosition(null)
     setContainerWidth(15)
